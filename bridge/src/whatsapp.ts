@@ -107,19 +107,36 @@ export class WhatsAppClient {
 
     // Handle incoming messages
     this.sock.ev.on('messages.upsert', async ({ messages, type }: { messages: any[]; type: string }) => {
-      if (type !== 'notify') return;
+      console.log(`📨 messages.upsert event: type=${type}, count=${messages.length}`);
+      if (type !== 'notify') {
+        console.log(`⏭️  Skipping non-notify type: ${type}`);
+        return;
+      }
 
       for (const msg of messages) {
+        console.log(`📩 Processing message: fromMe=${msg.key.fromMe}, remoteJid=${msg.key.remoteJid}`);
+
         // Skip own messages
-        if (msg.key.fromMe) continue;
+        if (msg.key.fromMe) {
+          console.log('⏭️  Skipping own message');
+          continue;
+        }
 
         // Skip status updates
-        if (msg.key.remoteJid === 'status@broadcast') continue;
+        if (msg.key.remoteJid === 'status@broadcast') {
+          console.log('⏭️  Skipping status broadcast');
+          continue;
+        }
 
         const content = this.extractMessageContent(msg);
-        if (!content) continue;
+        console.log(`📝 Extracted content: ${content ? content.substring(0, 50) : '(empty)'}`);
+        if (!content) {
+          console.log('⏭️  No content extracted');
+          continue;
+        }
 
         const isGroup = msg.key.remoteJid?.endsWith('@g.us') || false;
+        console.log(`✅ Message valid: sender=${msg.key.remoteJid}, isGroup=${isGroup}, content="${content}"`);
 
         this.options.onMessage({
           id: msg.key.id || '',

@@ -95,14 +95,16 @@ class WhatsAppChannel(BaseChannel):
     
     async def _handle_bridge_message(self, raw: str) -> None:
         """Handle a message from the bridge."""
+        logger.debug("Bridge message received: {}", raw[:200])
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:
             logger.warning("Invalid JSON from bridge: {}", raw[:100])
             return
-        
+
         msg_type = data.get("type")
-        
+        logger.debug("Message type: {}", msg_type)
+
         if msg_type == "message":
             # Incoming message from WhatsApp
             # Deprecated by whatsapp: old phone number style typically: <phone>@s.whatspp.net
@@ -123,6 +125,8 @@ class WhatsAppChannel(BaseChannel):
             user_id = pn if pn else sender
             sender_id = user_id.split("@")[0] if "@" in user_id else user_id
             logger.info("Sender {}", sender)
+            logger.debug("Message details: pn={}, sender={}, sender_id={}, content={}, is_group={}",
+                        pn, sender, sender_id, content[:50] if content else "", data.get("isGroup", False))
 
             # Handle voice transcription if it's a voice message
             if content == "[Voice Message]":
