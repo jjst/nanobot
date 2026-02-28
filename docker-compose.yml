@@ -9,7 +9,8 @@ services:
   nanobot-whatsapp-bridge:
     container_name: nanobot-whatsapp-bridge
     <<: *common-config
-    command: ["sh", "-c", "cd /app/bridge && npm start"]
+    entrypoint: ["node"]
+    command: ["/app/bridge/dist/index.js"]
     restart: unless-stopped
     environment:
       - BRIDGE_PORT=3001
