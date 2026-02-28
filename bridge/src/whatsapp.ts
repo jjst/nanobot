@@ -31,15 +31,18 @@ export interface WhatsAppClientOptions {
   onMessage: (msg: InboundMessage) => void;
   onQR: (qr: string) => void;
   onStatus: (status: string) => void;
+  skipOwnMessages?: boolean;
 }
 
 export class WhatsAppClient {
   private sock: any = null;
   private options: WhatsAppClientOptions;
   private reconnecting = false;
+  private skipOwnMessages: boolean;
 
   constructor(options: WhatsAppClientOptions) {
     this.options = options;
+    this.skipOwnMessages = options.skipOwnMessages ?? true;
   }
 
   async connect(): Promise<void> {
@@ -116,9 +119,10 @@ export class WhatsAppClient {
       for (const msg of messages) {
         console.log(`📩 Processing message: fromMe=${msg.key.fromMe}, remoteJid=${msg.key.remoteJid}`);
 
-        // Skip own messages
-        if (msg.key.fromMe) {
-          console.log('⏭️  Skipping own message');
+        // Skip own messages if configured (default: true for backwards compat)
+        // In linked device mode, user messages have fromMe=true, so set SKIP_OWN_MESSAGES=false
+        if (this.skipOwnMessages && msg.key.fromMe) {
+          console.log('⏭️  Skipping own message (SKIP_OWN_MESSAGES=true)');
           continue;
         }
 

@@ -22,7 +22,7 @@ export class BridgeServer {
   private wa: WhatsAppClient | null = null;
   private clients: Set<WebSocket> = new Set();
 
-  constructor(private host: string, private port: number, private authDir: string, private token?: string) {}
+  constructor(private host: string, private port: number, private authDir: string, private token?: string, private skipOwnMessages: boolean = true) {}
 
   async start(): Promise<void> {
     // Bind to configured host (default: localhost only for security)
@@ -36,6 +36,7 @@ export class BridgeServer {
       onMessage: (msg) => this.broadcast({ type: 'message', ...msg }),
       onQR: (qr) => this.broadcast({ type: 'qr', qr }),
       onStatus: (status) => this.broadcast({ type: 'status', status }),
+      skipOwnMessages: this.skipOwnMessages,
     });
 
     // Handle WebSocket connections

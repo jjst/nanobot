@@ -16,6 +16,7 @@ services:
       - BRIDGE_HOST=0.0.0.0
       - BRIDGE_PORT=3001
       - AUTH_DIR=/root/.nanobot/whatsapp-auth
+      - SKIP_OWN_MESSAGES=false
     networks:
       - nanobot
     deploy:
